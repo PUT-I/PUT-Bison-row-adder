@@ -1,3 +1,5 @@
+%option noyywrap
+
 %{
 #include "structs.hpp"
 #include <iostream>
@@ -16,28 +18,33 @@ extern unsigned int column;
 inline void assign_yyval_str(const char* text);
 %}
 
+fixed ([0]|[1-9][0-9]*)[.][0-9]+
+float ([0]|[1-9][0-9]*)[.][0-9]+[E]([+]|[-])[0-9]+
+int [0]|[1-9][0-9]*
+hex [1-9A-Fa-f][0-9A-Fa-f]*
+
 %%
-[0]|([1-9][0-9]*) {
+\r\n|\n|\r { newLine = true; return ENDLINE; }
+[ ]  { column++; }
+[\t] { column += 5; }
+
+{fixed} { assign_yyval_str(yytext); return FIXED; }
+
+{float} { assign_yyval_str(yytext); return FLOAT; }
+
+{int} {
 	assign_yyval_str(yytext);
 	if(newLine){ newLine = false; return LINE_NUM; }
 	else { return INT; }
 }
-[0-9]+ { assign_yyval_str(yytext); return FRACT; }
-[1-9A-F][0-9AF]* { assign_yyval_str(yytext); return HEX; }
 
-[E]([-]|[+])[0-9]+ { assign_yyval_str(yytext); return EXP; }
+{hex} {  assign_yyval_str(yytext); return HEX; }
 
-\r\n|\n|\r { newLine = true; return ENDLINE; }
+
 <<EOF>> { 
 	if(!end) { end = true; return ENDLINE; }
-	else {
-		return 0;
-	}
+	else { return 0; }
 }
-
-[.] { column++; return yytext[0]; }
-
-[ \t] { column++; }
 
 . { return UNK; }
 %%
@@ -48,8 +55,6 @@ int yyerror(const char* str) {
 	std::cerr << codeLine << ':' << column << ": error: " << str << '\n';
 	return 1;
 }
-
-int yywrap() { return 1; }
 
 void assign_yyval_str(const char* text){
 	yylval.str = new std::string(text);

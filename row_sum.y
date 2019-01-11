@@ -9,7 +9,6 @@
 
     //---- Deklaracje funkcji do wykorzystania w pliku lex
 	int yylex();
-    int yywrap();
 	int yyerror(const char*);
 
     //---- Stałe globalne
@@ -35,8 +34,6 @@
 //---- Symbole nieterminalne
 %start START
 %type<line> LINE
-%type<str> FIXED
-%type<str> FLOAT
 %type<nums> NUMBERS
 
 //---- Symbole terminalne
@@ -44,66 +41,50 @@
 %token<str> LINE_NUM
 %token<str> INT
 %token<str> HEX
-%token<str> FRACT
-%token<str> EXP
+%token<str> FIXED
+%token<str> FLOAT
 
 %token UNK
 
 %%
 
 START : START LINE {
-            std::cout << $2->lineNum << ' ';
-            sum_line(*$2);
-            std::cout << '\n';
-            
-            delete $2;
+            sum_line(*$2); delete $2;
             codeLine++;
             column = 1;
         }
-      | /*nic*/ {}
+      | /*nic*/ { }
       ;
 
 LINE : LINE_NUM NUMBERS ENDLINE {
             $$ = new Line();
             $$->lineNum = stoi(*$1);
-            $$->numbers = *$2;
-            delete $2;
+            $$->numbers = *$2; delete $2;
             $2 = new std::vector<Number>;
         }
      ;
 
 NUMBERS : NUMBERS INT {
             $$ = $1;
-            $$->push_back(Number(*$2, "INTEGER"));
-            delete $2;
+            $$->push_back(Number(*$2, "INTEGER")); delete $2;
             if(int result = check_types(*$$) != -1) { return result; }
         }
       | NUMBERS HEX {
             $$ = $1;
-            $$->push_back(Number(*$2, "HEX"));
-            delete $2;
+            $$->push_back(Number(*$2, "HEX")); delete $2;
             if(int result = check_types(*$$) != -1) { return result; }
         }
       | NUMBERS FIXED {
             $$ = $1;
-            $$->push_back(Number(*$2, "FIXED"));
-            delete $2;
+            $$->push_back(Number(*$2, "FIXED")); delete $2;
             if(int result = check_types(*$$) != -1) { return result; }
         }
       | NUMBERS FLOAT {
             $$ = $1;
-            $$->push_back(Number(*$2, "FLOAT"));
-            delete $2;
+            $$->push_back(Number(*$2, "FLOAT")); delete $2;
             if(int result = check_types(*$$) != -1) { return result; }
         }
       | /*nic*/ { $$ = new std::vector<Number>; }
-      ;
-
-FIXED : INT '.' FRACT { *$$ = *$1 + "." + *$3; }
-      | INT '.' INT   { *$$ = *$1 + "." + *$3; }
-      ;
-
-FLOAT : FIXED EXP { *$$ = *$1 + *$2; }
       ;
 %%
 
@@ -133,6 +114,13 @@ void deduct_type(Line& line){
 
 void sum_line(Line& line) {
     deduct_type(line);
+
+    std::cout << "\nLine number: " << line.lineNum << '\n';
+    std::cout << "Numbers: ";
+    for(const Number& number : line.numbers) {
+        std::cout << number.val << ' ';
+    }
+    std::cout << "\nSum: ";
 
     if (line.type == "INTEGER") {
         unsigned int result = 0;
@@ -175,4 +163,6 @@ void sum_line(Line& line) {
         std::cout << std::scientific << std::setprecision(15) << result;
         std::cout.copyfmt(cout_state);
     } //end FLOAT
+
+    std::cout << '\n';
 }
