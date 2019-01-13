@@ -3,7 +3,7 @@ Simple program which checks rows data type coherency, sums them and displays res
 
 ## Capabilities and limitations
   - deducing row's type (integer, hexadecimal, decimal fraction, scientific),
-  - row summing and displaying in format correct format (based on type),
+  - row summing and displaying results in correct format (based on type),
   - can't recognize rows of hexadecimals with no letters correctly (recognized as integer rows),
   - limited precision (15 decimal places),
   - error detection (invalid row data),
