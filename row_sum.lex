@@ -10,7 +10,6 @@ int yyparse();
 
 //---- Zmienne globalne
 bool end = false;
-bool newLine = true;
 extern unsigned int codeLine;
 extern unsigned int column;
 
@@ -24,7 +23,7 @@ int [0]|[1-9][0-9]*
 hex [1-9A-Fa-f][0-9A-Fa-f]*
 
 %%
-\r\n|\n|\r { newLine = true; return ENDLINE; }
+\r\n|\n|\r { return ENDLINE; }
 [ ]  { column++; }
 [\t] { column += 5; }
 
@@ -34,8 +33,7 @@ hex [1-9A-Fa-f][0-9A-Fa-f]*
 
 {int} {
 	assign_yyval_str(yytext);
-	if(newLine){ newLine = false; return LINE_NUM; }
-	else { return INT; }
+	return INT;
 }
 
 {hex} {  assign_yyval_str(yytext); return HEX; }

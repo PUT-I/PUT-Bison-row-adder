@@ -56,7 +56,7 @@ START : START LINE {
       | /*nic*/ { }
       ;
 
-LINE : LINE_NUM NUMBERS ENDLINE {
+LINE : INT NUMBERS ENDLINE {
             $$ = new Line();
             $$->lineNum = stoi(*$1);
             $$->numbers = *$2; delete $2;
