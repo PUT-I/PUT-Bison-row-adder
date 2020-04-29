@@ -1,4 +1,4 @@
-# Row_Sum_Bison_Flex_CPP
+# Bison row adder
 Simple program which checks rows data type coherency, sums them and displays result in correct format.
 
 ## Capabilities and limitations
